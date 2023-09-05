@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>pain-app-mobile</title>
+  <style>
+    /* custom sliders: */
+    :root {
+      --disabled-grey: #d5d5d5;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      margin: 18px 0;
+      flex: 3;
+    }
+
+    input[type=range]:focus {
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 6px;
+      cursor: pointer;
+      background: #adadad;
+      border-radius: 5px;
+    }
+
+
+    input[type=range]::-webkit-slider-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #616161;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -9.5px;
+    }
+
+
+    input[type=range]::-moz-range-track {
+      height: 6px;
+      cursor: pointer;
+      background: #adadad;
+      border-radius: 5px;
+    }
+
+    input[type=range]::-moz-range-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #616161;
+      cursor: pointer;
+      margin-top: -9.5px;
+    }
+
+    input[type=range]:disabled::-webkit-slider-runnable-track {
+      background: var(--disabled-grey);
+      cursor: unset;
+    }
+
+    input[type=range]:disabled::-webkit-slider-thumb {
+      background: var(--disabled-grey);
+      cursor: unset;
+    }
+
+    input[type=range]:disabled:-moz-range-track {
+      background: var(--disabled-grey);
+      cursor: unset;
+    }
+
+    input[type=range]:disabled:-moz-range-thumb {
+      background: var(--disabled-grey);
+      cursor: unset;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    pain-app-mobile is a JavaScript app. Please enable JavaScript to continue.
+  </noscript>
+  <div id="app"></div>
+  <script src="/js/libraries/painshapevisualization.js"></script>
+  <script src="/js/compiled/app.js"></script>
+</body>
+
+</html>

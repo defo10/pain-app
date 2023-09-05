@@ -86,3 +86,10 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+.calva/
+.clj-kondo/
+.lsp
+.shadow-cljs
+
+resources/public/js/compiled/
