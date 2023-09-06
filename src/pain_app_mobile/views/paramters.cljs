@@ -88,16 +88,17 @@
                                                                 :radius 20}])}
          "+"]])]))
 
-(defn decorated-slider [id label min max step value on-change]
+(defn decorated-slider [id label min max step value on-change disabled]
   [:li {:key id}
-   [:label {:for id} label]
+   [:label {:for id :style {:color (if disabled "var(--disabled-grey)" "unset")}} label]
    [:div.row
-    [components/slider min max step value on-change]]])
+    [components/slider min max step value on-change disabled]]])
 
-(defn simple-parameter-slider [id label min max step parse-fn]
+(defn simple-parameter-slider [id label min max step parse-fn disabled]
   (let [param @(re-frame/subscribe [::subs/parameter id])]
     (decorated-slider id label min max step param
-                      #(re-frame/dispatch [::events/set-param id (parse-fn %)]))))
+                      #(re-frame/dispatch [::events/set-param id (parse-fn %)])
+                      disabled)))
 
 (def parameters-next-routing
   {:pain-points :painform
@@ -116,7 +117,7 @@
 
 (defn navigation-row []
   (let [page-id @(re-frame/subscribe [::subs/page-id])]
-    [:div.row {:style {:padding "16px" :position :sticky :top "80px" :height "40px"}}
+    [:div.row {:style {:padding "16px" :height "40px"}}
      [outlined-button ["Zurück"] (if (= page-id :pain-points)
                                    #(js/location.reload)
                                    #(re-frame/dispatch [:set-page-id (page-id parameters-back-routing)]))]
@@ -125,16 +126,17 @@
        [outlined-button ["Weiter"] #(re-frame/dispatch [:set-page-id (page-id parameters-next-routing)]) "black" {}])]))
 
 (defn painform []
-  [:div.box
-   (title "./assets/icons/headers/Form.png" "Form" ["Wenn Ihr Schmerz eine Form hätte, welche würde das sein?"
-                                                    "Stellen Sie als nächstes über die drei Werkzeuge die Form Ihres Schmerzes ein."
-                                                    "Über die „Strahlen“ können Sie bestimmen, ob Ihr eine geschlossne Form ist, oder spitz Ausstrahlt."
-                                                    "Über die „Rund/Zackig“ können Sie einstellen, ob es sich um stumpfe oder abgerundete Strahlen handelt."
-                                                    "Über „Feinheit“ können Sie die Anzahl der Strahlen einstellen."])
-   [:div.divider]
-   (simple-parameter-slider :wing-length "Strahlen" 0 1 0.01 event->number)
-   (simple-parameter-slider :spikiness "Rund/Zackig" 0 1 0.01 event->number)
-   (simple-parameter-slider :num-wings "Feinheit" 5 40 1 event->int)])
+  (let [wing-length-enabled (= @(re-frame/subscribe [::subs/parameter :wing-length]) 0)]
+    [:div.box
+     (title "./assets/icons/headers/Form.png" "Form" ["Wenn Ihr Schmerz eine Form hätte, welche würde das sein?"
+                                                      "Stellen Sie als nächstes über die drei Werkzeuge die Form Ihres Schmerzes ein."
+                                                      "Über die „Strahlen“ können Sie bestimmen, ob Ihr Schmerz eine geschlossene Form ist, oder spitz ausstrahlt."
+                                                      "Über „Rund/Zackig“ können Sie einstellen, ob es sich um stumpfe oder abgerundete Strahlen handelt."
+                                                      "Über „Feinheit“ können Sie die Anzahl der Strahlen einstellen."])
+     [:div.divider]
+     (simple-parameter-slider :wing-length "Strahlen" 0 1 0.01 event->number false)
+     (simple-parameter-slider :spikiness "Rund/Zackig" 0 1 0.01 event->number wing-length-enabled)
+     (simple-parameter-slider :num-wings "Feinheit" 5 40 1 event->int wing-length-enabled)]))
 
 (defn materialness []
   [:div.box
@@ -143,8 +145,8 @@
                                                                      "Über die „Schärfe“ können Sie bestimmen, ob Ihr Schmerz klar abgegrenzt, oder diffus verläuft."
                                                                      "Über die Auflösung können Sie bestimmen, ob der Schmerz ein abgeschlossene Fläche ist, oder aus Einzelpunkten besteht."])
    [:div.divider]
-   (simple-parameter-slider :sharpness "Schärfe" 0.05 0.95 0.01 event->number)
-   (simple-parameter-slider :dissolve "Auflösung" 0 1 0.01 event->number)])
+   (simple-parameter-slider :sharpness "Schärfe" 0.05 0.95 0.01 event->number false)
+   (simple-parameter-slider :dissolve "Auflösung" 0 1 0.01 event->number false)])
 
 (defclass circular-btn []
   {:height "38px"
@@ -188,7 +190,7 @@
        (color-radio-button "rgb(250, 27, 27)" (= :red selected) (set-color-fn :red))
        (color-radio-button "rgb(13, 36, 239)" (= :blue selected) (set-color-fn :blue))
        (color-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-color-fn :yellow))])]
-   (simple-parameter-slider :lightness "Helligkeit" 0.3 0.8 0.01 event->number)
+   (simple-parameter-slider :lightness "Helligkeit" 0.3 0.8 0.01 event->number false)
    [:li {:key :outerColor}
     [:label {:for :outerColor} "Verlauf zu"]
     (let [selected @(re-frame/subscribe [::subs/parameter :outerColor])]
@@ -196,7 +198,8 @@
        (colorshift-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-colorshift-fn :yellow))
        (colorshift-radio-button "rgb(250, 142, 27)" (= :orange selected) (set-colorshift-fn :orange))
        (colorshift-radio-button "rgb(196, 196, 196)" (= :transparency selected) (set-colorshift-fn :transparency))])]
-   (simple-parameter-slider :colorShift "Verlauf zu" 0 1 0.01 event->number)])
+   (let [selected-transparency (= @(re-frame/subscribe [::subs/parameter :outerColor]) :transparency)]
+     (simple-parameter-slider :colorShift "Verlauf zu" 0 1 0.01 event->number selected-transparency))])
 
 (defn image-radio-button [css-bg-image on-click]
   [:button {:class (circular-btn)
@@ -216,13 +219,16 @@
                       (set-animation-behavior-fn id)))
 
 (defn simple-animation-parameter-picker [file-prefix id selected]
-  (image-radio-button (str "url(./assets/icons/Animationsparameter/" file-prefix "-" (if (= id selected) "selected" "clear")  ".png)")
-                      (set-animation-parameter-fn id)))
+  (let [id-value @(re-frame/subscribe [::subs/parameter id])
+        file-state (if (= id selected) "selected"
+                       (if (= id-value 0) "inactive" "clear"))
+        on-click-fn (if (= file-state "inactive") #() (set-animation-parameter-fn id))]
+    (image-radio-button (str "url(./assets/icons/Animationsparameter/" file-prefix "-" file-state ".png)") on-click-fn)))
 (defn animation []
   [:div.box
-   (title "./assets/icons/headers/Animation.png" "Animation" ["Ist Ihr Schmerz pulsierend, drückend oder Stechend oder still? Hat dieser eine Richtung?"
-                                                              "Stellen Sie dieses als nächstes Ein!"
-                                                              "Wählen Sie erst, ob diese Aufbauend, Abbauend oder gleichmäßig pulsieren soll und anschließend, welchen 
+   (title "./assets/icons/headers/Animation.png" "Animation" ["Ist Ihr Schmerz pulsierend, drückend oder stechend oder still? Hat dieser eine Richtung?"
+                                                              "Stellen Sie dieses als nächstes ein!"
+                                                              "Wählen Sie erst, ob diese aufbauend, abbauend oder gleichmäßig pulsieren sollen und anschließend, welchen 
                                                                Parameter (Größe, Form, Materialität, Schärfe) Sie animieren wollen."
                                                               "Über die Schieberegler können Sie die Frequenz und das Volumen der Animation einstellen."])
    [:div.divider]
@@ -246,8 +252,8 @@
         (simple-animation-parameter-picker "amount" :dissolve selected)
         (simple-animation-parameter-picker "gradient" :sharpness selected)]
        [:div.divider {:style {:margin-bottom 0}}]])]
-   (simple-parameter-slider :animation-frequency-hz "Frequenz" 0.4 5 0.01 event->number)
-   (simple-parameter-slider :animation-amplitude "Volumen" 0.1 1 0.01 event->number)
+   (simple-parameter-slider :animation-frequency-hz "Frequenz" 0.4 5 0.01 event->number false)
+   (simple-parameter-slider :animation-amplitude "Volumen" 0.1 1 0.01 event->number false)
    [:div.divier]
    [:li {:key :animation-direction}
     [:label {:for :animation-direction} "Richtung"]

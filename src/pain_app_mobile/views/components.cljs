@@ -22,5 +22,8 @@
    (into [:button (merge {:class (outlined-button-style) :on-click on-click :style {:color color}} attr-override)] content)))
 
 
-(defn slider [min max step value on-change]
-  [:input.white-input-slider {:type :range :min min, :max max, :step step, :value value :on-change on-change}])
+(defn slider
+  ([min max step value on-change]
+   (slider min max step value on-change false))
+  ([min max step value on-change disabled]
+   [:input {:type :range :min min, :max max, :step step, :value value :on-change on-change :disabled disabled}]))
