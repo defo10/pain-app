@@ -13,14 +13,11 @@
    {:reagent-render (fn []
                       [:div#canvasContainer
                        {:style
-                        {:position :sticky
-                         :top "152px"
-                         :background-color "red"
+                        {:background-color "red"
                          :width "100%"
                          :height "50vh"}}])
     :component-did-mount (fn [component]
                            (let [{:keys [asset-location parameters]} (reagent/props component)]
-                             (prn "mount is called")
                              (when (compare-and-set! db/pain-vis nil
                                                      (new pain-vis (.getElementById js/document "canvasContainer")))
                                (.then (js/Promise.resolve ^js (.init @db/pain-vis))

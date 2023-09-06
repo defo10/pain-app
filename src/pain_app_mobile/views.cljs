@@ -12,15 +12,16 @@
 (defn header []
   (let [page-id @(re-frame/subscribe [::subs/page-id])]
     [:div {:style
-           {:height "80px"
-            :position :sticky
+           {:position :fixed
             :top 0
+            :height "80px"
             :width "100%"
             :background-color styles/secondary
             :display "flex"
             :justify-content :space-between
             :align-items :center
-            :font-weight 600}}
+            :font-weight 600
+            :z-index 2}}
      [:div]
      [:div {:style {:padding "1em"}} (case page-id
                                        :start "WILLKOMMEN"
@@ -55,61 +56,62 @@
    :margin-bottom "1rem"})
 
 (defn impressum []
-  [:div.main {:class (styles/text-container) :style {}}
-   [:p "Diese Anwendung ist in dem Forschungsprojekt „Schmerzen Formen“ entwickelt worden, welches in Kooperation zwischen der Fakultät Kunst und Gestaltung der Bauhaus-Universität Weimar und der Klinik für Anästhesiologie und  Intensivmedizin der Universität Jena durchgeführt wurde."]
-   [:p "Wir freuen uns über Kritik und Anregungen, schicken Sie uns dazu gerne eine " [:a {:href "mailto:mail@johannesbreuer.de"} "Mail."]]
-   [:div.row {:style {:padding-top "20vh" :padding-bottom "5vh"}}
-    [:img {:src "./assets/Logo_Jena.jpg" :style {:height 100}}]
-    [:img {:src "./assets/Logo_Weimar.jpg" :style {:height 100}}]]
-   [:p {:class (subtitle)} "PhD-Arbeit von Johannes Breuer, M.A., betreut durch: Prof. Dr. Jan Sebastian Willmann und Prof. Dipl. Des. Andreas Mühlenberend 
+  [:div.main
+   [:div {:class (styles/text-container)}
+    [:p "Diese Anwendung ist in dem Forschungsprojekt „Schmerzen Formen“ entwickelt worden, welches in Kooperation zwischen der Fakultät Kunst und Gestaltung der Bauhaus-Universität Weimar und der Klinik für Anästhesiologie und  Intensivmedizin der Universität Jena durchgeführt wurde."]
+    [:p "Wir freuen uns über Kritik und Anregungen, schicken Sie uns dazu gerne eine " [:a {:href "mailto:mail@johannesbreuer.de"} "Mail."]]
+    [:div.row {:style {:padding-top "20vh" :padding-bottom "5vh"}}
+     [:img {:src "./assets/Logo_Jena.jpg" :style {:height 100}}]
+     [:img {:src "./assets/Logo_Weimar.jpg" :style {:height 100}}]]
+    [:p {:class (subtitle)} "PhD-Arbeit von Johannes Breuer, M.A., betreut durch: Prof. Dr. Jan Sebastian Willmann und Prof. Dipl. Des. Andreas Mühlenberend 
         (Bauhaus-Universität Weimar). Begleitet von Prof. Dr. med. Winfried Meißner, Dr. Philipp Baumbach und Dr. Christin Arnold 
         (Universitätsklinikum Jena). Die Webseite wurde von Daniel Stachnik, M.A. (Hasso-Plattner Institut der Universität Potsdam) 
         umgesetzt."]
-   [:p {:class (subtitle) :style {:font-weight "bold"}} "Angaben gem. § 5 TMG:"]
-   [:p {:class (subtitle)} "Johannes Breuer"]
-   [:p {:class (subtitle) :style {:margin-bottom 0}} "Bülowstr. 61"]
-   [:p {:class (subtitle)} "10783 Berlin"]
-   [:p {:class (subtitle) :style {:margin-bottom "2rem"}} "E-Mail: johannes.breuer@uni-weimar.de"]
-   [outlined-button ["Zurück"] (fn [] (re-frame/dispatch [:set-page-id :start]))]])
+    [:p {:class (subtitle) :style {:font-weight "bold"}} "Angaben gem. § 5 TMG:"]
+    [:p {:class (subtitle)} "Johannes Breuer"]
+    [:p {:class (subtitle) :style {:margin-bottom 0}} "Bülowstr. 61"]
+    [:p {:class (subtitle)} "10783 Berlin"]
+    [:p {:class (subtitle) :style {:margin-bottom "2rem"}} "E-Mail: johannes.breuer@uni-weimar.de"]
+    [outlined-button ["Zurück"] (fn [] (re-frame/dispatch [:set-page-id :start]))]]])
 
 (defn str->p [i str] [:p {:key i :style {:font-size "1.2rem"}} str])
 
 (defn overlay-container [overlay]
-  [:div {:style {:width "100vw" :height "100vh" :position :absolute :z-index :2 :backdrop-filter "blur(20px)"}}
+  [:div {:style {:width "100vw" :height "100vh" :position :absolute :z-index :3 :backdrop-filter "blur(20px)"}}
    [:div.row {:style {:flex-direction :row-reverse :margin-top "3%" :margin-right "5%"}}
-    [:button {:class (styles/text-button) :on-click #(re-frame/dispatch [::events/set-overlay nil])} "X"]]
+    [:button {:class (styles/text-button) :on-click #(re-frame/dispatch [::events/set-overlay nil])} "×"]]
    [:div.center {:style {:padding "10% 10%"}} (map-indexed str->p overlay)]])
 
 (defn main-panel []
-  [:div {:style {:overflow-y :hidden}}
-   [:div {:style {:height "100vh" :display :flex :flex-direction :column :align-items :center :overflow-y :scroll}}
-    [header]
-    (let [overlay @(re-frame/subscribe [::subs/overlay])]
-      (when overlay
-        [overlay-container overlay]))
-    (let [page-id @(re-frame/subscribe [::subs/page-id])]
-      (case page-id
-        :start [intro]
-        :impressum [impressum]
-        :areapicker-general [areapickers/overview]
-        :areapicker-whole-body [areapickers/whole-body]
-        :areapicker-part-body [areapickers/part-of-body]
-        :areapicker-neck [areapickers/neck]
-        :areapicker-arms [areapickers/arms]
-        :areapicker-torso [areapickers/torso]
-        :areapicker-subbody [areapickers/subbody]
-        :areapicker-legs [areapickers/legs]
+  [:div {:style {:display :flex :flex-direction :column :align-items :center :height "calc(100vh)"}}
+   (let [overlay @(re-frame/subscribe [::subs/overlay])]
+     (when overlay
+       [overlay-container overlay]))
+   [header]
+   (let [page-id @(re-frame/subscribe [::subs/page-id]) overlay @(re-frame/subscribe [::subs/overlay])]
+     (case page-id
+       :start [intro]
+       :impressum [impressum]
+       :areapicker-general [areapickers/overview]
+       :areapicker-whole-body [areapickers/whole-body]
+       :areapicker-part-body [areapickers/part-of-body]
+       :areapicker-neck [areapickers/neck]
+       :areapicker-arms [areapickers/arms]
+       :areapicker-torso [areapickers/torso]
+       :areapicker-subbody [areapickers/subbody]
+       :areapicker-legs [areapickers/legs]
        ;; we render the animation canvas here to prevent it from re-mounting the component on page change, thus
        ;; component-did-mount is only called once and the canvas isn't re-rendered repeatedly
-        [:div.main
+       [:div.main (when overlay {:style {:overflow-y "clip"}})
+        [:div {:style {:position :sticky :top "80px"}}
          [parameters/navigation-row]
          (let [asset-location @(re-frame/subscribe [::subs/area-asset])
                parameters @(re-frame/subscribe [::subs/parameters])]
-           [pain-vis-container {:asset-location asset-location :parameters parameters}])
-         (case page-id
-           :pain-points [parameters/painareas]
-           :painform [parameters/painform]
-           :materialness [parameters/materialness]
-           :paincolor [parameters/color]
-           :painanimation [parameters/animation]
-           :export [parameters/export])]))]])
+           [pain-vis-container {:asset-location asset-location :parameters parameters}])]
+        (case page-id
+          :pain-points [parameters/painareas]
+          :painform [parameters/painform]
+          :materialness [parameters/materialness]
+          :paincolor [parameters/color]
+          :painanimation [parameters/animation]
+          :export [parameters/export])]))])

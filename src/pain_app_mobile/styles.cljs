@@ -65,12 +65,14 @@
     :background-color :white}]
   [:a
    {:color :black}]
-  (at-media {:min-width "750px"} [:.main {:width "750px"}])
   [:.main
-   {:display :flex
+   {:width "100vw"
+    :margin-top "80px"
+    :display :flex
     :height "100%"
     :flex-direction :column
-    :background-color :white}])
+    :background-color :white}]
+  (at-media {:min-width "750px"} [:.main {:width "750px"}]))
 
 ; note: range inputs are directly styled within the index.html because I could not figure out how to 
 ; apply input[type="range"]::... selectors in garden/spade

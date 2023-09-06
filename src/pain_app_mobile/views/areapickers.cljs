@@ -1,56 +1,8 @@
 (ns pain-app-mobile.views.areapickers
-  (:require [clojure.spec.alpha :as s]
-            [pain-app-mobile.styles :as styles]
+  (:require [pain-app-mobile.styles :as styles]
             [spade.core :refer [defclass]]
             [pain-app-mobile.views.components :as components]
             [re-frame.core :as re-frame]))
-
-(def area-tree {:title "Wo schmerzt es?",
-                :displayName "",
-                :children
-                [{:title "Welche Ansicht vom ganzen Körper?",
-                  :displayName "Ganzer Körper",
-                  :children
-                  [{:displayName "Frontal", :assetLocation "wholeFront"}
-                   {:displayName "Von Hinten", :assetLocation "wholeBack"}
-                   {:displayName "Rechte Seite", :assetLocation "wholeRight"}
-                   {:displayName "Linke Seite", :assetLocation "wholeLeft"}]}
-                 {:title "Welcher Bereich?",
-                  :displayName "Bereich",
-                  :children
-                  [{:title "Wo am Kopf und Nacken?",
-                    :displayName "Kopf und Nacken",
-                    :children
-                    [{:displayName "Frontal", :assetLocation "partsHeadFront"}
-                     {:displayName "Hinterkopf und Nacken", :assetLocation "partsHeadBack"}
-                     {:displayName "Rechte Seite", :assetLocation "partsHeadRight"}
-                     {:displayName "Linke Seite", :assetLocation "partsHeadLeft"}]}
-                   {:title "Wo an Armen und Händen?",
-                    :displayName "Arme und Hände",
-                    :children
-                    [{:displayName "Rechter Arm", :assetLocation "partsArmsRight"}
-                     {:displayName "Rechte Hand", :assetLocation "partsArmsHandRight"}
-                     {:displayName "Linker Arm", :assetLocation "partsArmsLeft"}
-                     {:displayName "Linke Hand", :assetLocation "partsArmsHandLeft"}]}
-                   {:title "Wo am Torso?",
-                    :displayName "Torso",
-                    :children
-                    [{:displayName "Frontal", :assetLocation "partsUpperFront"}
-                     {:displayName "Rücken", :assetLocation "partsUpperBack"}
-                     {:displayName "Rechte Seite", :assetLocation "partsUpperRight"}
-                     {:displayName "Linke Seite", :assetLocation "partsUpperLeft"}]}
-                   {:title "Wo am Unterkörper?",
-                    :displayName "Unterkörper",
-                    :children
-                    [{:displayName "Frontal", :assetLocation "partsLowerFront"}
-                     {:displayName "Gesäß", :assetLocation "partsLowerBack"}]}
-                   {:title "Wo an Beinen und Füßen?",
-                    :displayName "Beine und Füße",
-                    :children
-                    [{:displayName "Beine Vorne", :assetLocation "partsLegsFront"}
-                     {:displayName "Beine Hinten", :assetLocation "partsLegsBack"}
-                     {:displayName "Rechter Fuß", :assetLocation "partsLegsFootRight"}
-                     {:displayName "Linker Fuß", :assetLocation "partsLegsFootLeft"}]}]}]})
 
 (declare areapicker-text-button)
 (defclass areapicker-text-button []
@@ -68,11 +20,12 @@
     (re-frame/dispatch [:set-page-id new-page-id])))
 
 (defn- areapicker-ui [title items prev-page-id]
-  [:div.main {:class (styles/text-container)}
-   [:p title]
-   (for [{:keys [label on-click]} items]
-     [:button {:key label :on-click on-click :class (areapicker-text-button)} label])
-   [:div {:style {:margin-top "2rem"}} [components/outlined-button ["Zurück"] (page-id-setter prev-page-id)]]])
+  [:div.main
+   [:div {:class (styles/text-container)}
+    [:p title]
+    (for [{:keys [label on-click]} items]
+      [:button {:key label :on-click on-click :class (areapicker-text-button)} label])
+    [:div {:style {:margin-top "2rem"}} [components/outlined-button ["Zurück"] (page-id-setter prev-page-id)]]]])
 
 (defn start-with-asset [asset]
   (fn []
