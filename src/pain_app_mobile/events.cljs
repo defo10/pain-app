@@ -22,6 +22,11 @@
  (fn [db [_ new-area-asset]]
    (assoc db :area-asset new-area-asset)))
 
+(re-frame/reg-event-db
+ ::set-overlay
+ (fn [db [_ overlay]]
+   (assoc db :overlay overlay)))
+
 (defn update-areas [db [_ new-area]]
   {:pre [(s/valid? ::specs/painarea new-area)]}
   (assoc-in db [:parameters :areas]

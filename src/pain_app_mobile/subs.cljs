@@ -31,3 +31,8 @@
  ::parameters
  (fn [db]
    (:parameters db)))
+
+(re-frame/reg-sub
+ ::overlay
+ (fn [db]
+   (:overlay db)))

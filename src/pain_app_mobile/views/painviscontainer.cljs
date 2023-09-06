@@ -20,11 +20,15 @@
                          :height "50vh"}}])
     :component-did-mount (fn [component]
                            (let [{:keys [asset-location parameters]} (reagent/props component)]
-                             (compare-and-set! db/pain-vis nil
-                                               (new pain-vis (.getElementById js/document "canvasContainer")))
-                             (.then (js/Promise.resolve ^js (.init @db/pain-vis))
-                                    #(.start @db/pain-vis asset-location))
-                             ^js (.updateModel @db/pain-vis (clj->js parameters))))
+                             (prn "mount is called")
+                             (when (compare-and-set! db/pain-vis nil
+                                                     (new pain-vis (.getElementById js/document "canvasContainer")))
+                               (.then (js/Promise.resolve ^js (.init @db/pain-vis))
+                                      #(.start @db/pain-vis asset-location))
+                               ^js (.updateModel @db/pain-vis (clj->js parameters)))))
     :component-did-update (fn [component]
                             (let [{:keys [parameters]} (reagent/props component)]
-                              ^js (.updateModel @db/pain-vis (clj->js parameters))))}))
+                              ^js (.updateModel @db/pain-vis (clj->js parameters))))
+    :component-will-unmount (fn [_]
+                              (.destroy @db/pain-vis)
+                              (reset! db/pain-vis nil))}))

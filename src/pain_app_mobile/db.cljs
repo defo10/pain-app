@@ -4,6 +4,7 @@
   {:name "re-frame"
    :page-id :start
    :area-asset ""
+   :overlay nil
    :parameters {:areas []
                 :wing-length 0
                 :spikiness 0.2
@@ -17,6 +18,7 @@
                 :animation-behavior :off
                 :animation-parameter :radius
                 :animation-frequency-hz 1
-                :animation-amplitude 0.5}})
+                :animation-amplitude 0.5
+                :animation-origin [0 0]}})
 
 (def pain-vis (atom nil))

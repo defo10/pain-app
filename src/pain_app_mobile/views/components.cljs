@@ -11,7 +11,9 @@
    :padding "0.6em"
    :font-weight "bold"
    :font-size "medium"
-   :cursor "pointer"})
+   :cursor "pointer"
+   :display "flex"})
+
 
 (defn outlined-button
   ([content on-click]

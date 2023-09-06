@@ -2,11 +2,12 @@
   (:require [pain-app-mobile.events :as events]
             [pain-app-mobile.styles :as styles]
             [pain-app-mobile.subs :as subs]
-            [pain-app-mobile.utils :as utils]
             [pain-app-mobile.views.components :as components :refer [outlined-button]]
             [re-frame.core :as re-frame]
             [spade.core :refer [defclass]]
-            [pain-app-mobile.views.painviscontainer :refer [pain-vis-container]]))
+            ["react-joystick-component" :refer [Joystick]]
+            [reagent.core :as reagent]
+            [pain-app-mobile.db :as db]))
 
 (defn event->int [event]
   (-> event .-target .-value js/parseInt))
@@ -19,7 +20,6 @@
                                      :radius (event->int event)
                                      :position position}]))
 
-(declare thumbnail-image)
 (defclass thumbnail-image [bg-image-location]
   {:background-image (str "url(" bg-image-location ")")
    :margin-right "8px"
@@ -28,13 +28,11 @@
    :border-radius "50%"
    :background-size :contain})
 
-(declare trash-button-container)
 (defclass trash-button-container []
   {:margin-left "16px"
    :display :grid
    :place-items :center})
 
-(declare trash-button)
 (defclass trash-button []
   {:height "20px"
    :width "20px"
@@ -43,45 +41,52 @@
    :background-repeat :no-repeat
    :cursor :pointer})
 
-(defn- abstract-parameters [back-fn next-fn content]
-  [:div.content
-   [:div.row {:style {:padding "16px" :position :sticky :top "80px" :height "40px"}}
-    [outlined-button ["Zurück"] back-fn] [outlined-button ["Weiter"] next-fn]]
-   (let [asset-location @(re-frame/subscribe [::subs/area-asset])
-         parameters @(re-frame/subscribe [::subs/parameters])]
-     [pain-vis-container {:asset-location asset-location :parameters parameters}])
-   content])
+(defclass download-button-icon-container []
+  {:margin-left "16px"
+   :display :grid
+   :place-items :center})
 
-(defn- title [icon-location title]
+(defclass download-button-icon []
+  {:height "20px"
+   :width "20px"
+   :background-image "url(./assets/icons/Icon_Download.png)"
+   :background-size :contain
+   :background-repeat :no-repeat
+   :cursor :pointer})
+
+(defn title [icon-location title overlay-texts]
   [:div.row
    [:div.row
     [:div {:class (thumbnail-image icon-location)}]
     [:h2 title]]
-   [:button {:class (styles/text-button) :style {:font-size "1rem"}} "ⓘ"]])
+   [:button {:class (styles/text-button)
+             :style {:font-size "1rem"}
+             :on-click #(re-frame/dispatch [::events/set-overlay overlay-texts])} "ⓘ"]])
 
 (defn painareas []
-  (abstract-parameters
-   (utils/goto-fn :areapicker-general)
-   (utils/goto-fn :painform)
-   (let [areas @(re-frame/subscribe [::subs/painareas])]
-     [:div.box
-      (title "./assets/icons/headers/Schmerzbereich.png" "Schmerzpunkte")
-      [:div.divider]
-      [:ul
-       (for [a areas] [:li {:key (:id a)}
-                       [:label {:for (:id a)} "Punkt " (:id a)]
-                       [:div.row
-                        [components/slider 10 100 1 (:radius a) #(add-area a %)]
-                        [:div {:class (trash-button-container)}
-                         [:div {:class (trash-button) :on-click #(re-frame/dispatch [:remove-area-with-id (:id a)])}]]]])]
-      (when (< (count areas) 7)
-        [:div.center
-         [:button {:class (styles/text-button)
-                   :style {:font-size "2rem"}
-                   :on-click #(re-frame/dispatch [:update-areas {:id (inc (apply max (conj (map :id areas) 0)))
-                                                                 :position [0 0]
-                                                                 :radius 20}])}
-          "+"]])])))
+  (let [areas @(re-frame/subscribe [::subs/painareas])]
+    [:div.box
+     (title "./assets/icons/headers/Schmerzbereich.png"
+            "Schmerzpunkte"
+            ["Legen Sie fest, ob die Schmerzfläche Offen oder geschlossen dargestellt werden soll."
+             "Fügen Sie Punkte über das '+' hinzu, verschieben Sie diese an die richtige Stelle und ändern die die Größe über den Schieberegler."
+             "Über das Mülltonnensymbol können Sie einen Punkt wieder entfernen."])
+     [:div.divider]
+     [:ul
+      (for [a areas] [:li {:key (:id a)}
+                      [:label {:for (:id a)} "Punkt " (:id a)]
+                      [:div.row
+                       [components/slider 10 100 1 (:radius a) #(add-area a %)]
+                       [:div {:class (trash-button-container)}
+                        [:div {:class (trash-button) :on-click #(re-frame/dispatch [:remove-area-with-id (:id a)])}]]]])]
+     (when (< (count areas) 7)
+       [:div.center
+        [:button {:class (styles/text-button)
+                  :style {:font-size "2rem"}
+                  :on-click #(re-frame/dispatch [:update-areas {:id (inc (apply max (conj (map :id areas) 0)))
+                                                                :position [0 0]
+                                                                :radius 20}])}
+         "+"]])]))
 
 (defn decorated-slider [id label min max step value on-change]
   [:li {:key id}
@@ -94,32 +99,59 @@
     (decorated-slider id label min max step param
                       #(re-frame/dispatch [::events/set-param id (parse-fn %)]))))
 
+(def parameters-next-routing
+  {:pain-points :painform
+   :painform :materialness
+   :materialness :paincolor
+   :paincolor :painanimation
+   :painanimation :export})
+
+(def parameters-back-routing
+  {:pain-points :start
+   :painform :pain-points
+   :materialness :painform
+   :paincolor :materialness
+   :painanimation :paincolor
+   :export :painanimation})
+
+(defn navigation-row []
+  (let [page-id @(re-frame/subscribe [::subs/page-id])]
+    [:div.row {:style {:padding "16px" :position :sticky :top "80px" :height "40px"}}
+     [outlined-button ["Zurück"] (if (= page-id :pain-points)
+                                   #(js/location.reload)
+                                   #(re-frame/dispatch [:set-page-id (page-id parameters-back-routing)]))]
+     (if (= page-id :export)
+       [:div]
+       [outlined-button ["Weiter"] #(re-frame/dispatch [:set-page-id (page-id parameters-next-routing)]) "black" {}])]))
+
 (defn painform []
-  (abstract-parameters
-   (utils/goto-fn :pain-points)
-   (utils/goto-fn :materialness)
-   [:div.box
-    (title "./assets/icons/headers/Form.png" "Form")
-    [:div.divider]
-    (simple-parameter-slider :wing-length "Strahlen" 0 1 0.01 event->number)
-    (simple-parameter-slider :spikiness "Rund/Zackig" 0 1 0.01 event->number)
-    (simple-parameter-slider :num-wings "Feinheit" 5 40 1 event->int)]))
+  [:div.box
+   (title "./assets/icons/headers/Form.png" "Form" ["Wenn Ihr Schmerz eine Form hätte, welche würde das sein?"
+                                                    "Stellen Sie als nächstes über die drei Werkzeuge die Form Ihres Schmerzes ein."
+                                                    "Über die „Strahlen“ können Sie bestimmen, ob Ihr eine geschlossne Form ist, oder spitz Ausstrahlt."
+                                                    "Über die „Rund/Zackig“ können Sie einstellen, ob es sich um stumpfe oder abgerundete Strahlen handelt."
+                                                    "Über „Feinheit“ können Sie die Anzahl der Strahlen einstellen."])
+   [:div.divider]
+   (simple-parameter-slider :wing-length "Strahlen" 0 1 0.01 event->number)
+   (simple-parameter-slider :spikiness "Rund/Zackig" 0 1 0.01 event->number)
+   (simple-parameter-slider :num-wings "Feinheit" 5 40 1 event->int)])
 
 (defn materialness []
-  (abstract-parameters
-   (utils/goto-fn :painform)
-   (utils/goto-fn :paincolor)
-   [:div.box
-    (title "./assets/icons/headers/Materialitaet.png" "Materialität")
-    [:div.divider]
-    (simple-parameter-slider :sharpness "Schärfe" 0.05 0.95 0.01 event->number)
-    (simple-parameter-slider :dissolve "Auflösung" 0 1 0.01 event->number)]))
+  [:div.box
+   (title "./assets/icons/headers/Materialitaet.png" "Materialität" ["Welche Beschaffenheit hat Ihr Schmerz?"
+                                                                     "Stellen Sie als nächstes über die zwei Werkzeuge die Materialität Ihres Schmerzes ein."
+                                                                     "Über die „Schärfe“ können Sie bestimmen, ob Ihr Schmerz klar abgegrenzt, oder diffus verläuft."
+                                                                     "Über die Auflösung können Sie bestimmen, ob der Schmerz ein abgeschlossene Fläche ist, oder aus Einzelpunkten besteht."])
+   [:div.divider]
+   (simple-parameter-slider :sharpness "Schärfe" 0.05 0.95 0.01 event->number)
+   (simple-parameter-slider :dissolve "Auflösung" 0 1 0.01 event->number)])
 
 (defclass circular-btn []
-  {:height "32px"
-   :width "32px"
+  {:height "38px"
+   :width "38px"
    :border-radius "50%"
-   :cursor :pointer})
+   :cursor :pointer
+   :margin "8px 16px 0 0"})
 
 (defn color-radio-button [css-color selected? on-click]
   [:button {:class (circular-btn)
@@ -142,28 +174,29 @@
   #(re-frame/dispatch [::events/set-param :outerColor new-color]))
 
 (defn color []
-  (abstract-parameters
-   (utils/goto-fn :painform)
-   (utils/goto-fn :painanimation)
-   [:div.box
-    (title "./assets/icons/headers/Farbe.png" "Farbe")
-    [:div.divider]
-    [:li {:key :color}
-     [:label {:for :color} "Farbe"]
-     (let [selected @(re-frame/subscribe [::subs/parameter :color])]
-       [:div.row
-        (color-radio-button "rgb(250, 27, 27)" (= :red selected) (set-color-fn :red))
-        (color-radio-button "rgb(13, 36, 239)" (= :blue selected) (set-color-fn :blue))
-        (color-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-color-fn :yellow))])]
-    (simple-parameter-slider :lightness "Helligkeit" 0.3 0.8 0.01 event->number)
-    [:li {:key :outerColor}
-     [:label {:for :outerColor} "Verlauf zu"]
-     (let [selected @(re-frame/subscribe [::subs/parameter :outerColor])]
-       [:div.row
-        (colorshift-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-colorshift-fn :yellow))
-        (colorshift-radio-button "rgb(250, 142, 27)" (= :orange selected) (set-colorshift-fn :orange))
-        (colorshift-radio-button "rgb(196, 196, 196)" (= :transparency selected) (set-colorshift-fn :transparency))])]
-    (simple-parameter-slider :colorShift "Verlauf zu" 0 1 0.01 event->number)]))
+  [:div.box
+   (title "./assets/icons/headers/Farbe.png" "Farbe" ["Welche Temperatur hat Ihr Schmerz?"
+                                                      "Wählen Sie eine Farbe und passen Sie die Helligkeit an."
+                                                      "Würden Sie Ihren Schmerz mit einem Verlauf darstellen?"
+                                                      "Sie können einen Verlauf zu Gelb, zu Orange oder keinen Verlauf wählen."
+                                                      "Mit dem Schieberegler können Sie die Stärke des Verlaufes bestimmen."])
+   [:div.divider]
+   [:li {:key :color}
+    [:label {:for :color} "Farbe"]
+    (let [selected @(re-frame/subscribe [::subs/parameter :color])]
+      [:div.row {:style {:justify-content :flex-start}}
+       (color-radio-button "rgb(250, 27, 27)" (= :red selected) (set-color-fn :red))
+       (color-radio-button "rgb(13, 36, 239)" (= :blue selected) (set-color-fn :blue))
+       (color-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-color-fn :yellow))])]
+   (simple-parameter-slider :lightness "Helligkeit" 0.3 0.8 0.01 event->number)
+   [:li {:key :outerColor}
+    [:label {:for :outerColor} "Verlauf zu"]
+    (let [selected @(re-frame/subscribe [::subs/parameter :outerColor])]
+      [:div.row {:style {:justify-content :flex-start}}
+       (colorshift-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-colorshift-fn :yellow))
+       (colorshift-radio-button "rgb(250, 142, 27)" (= :orange selected) (set-colorshift-fn :orange))
+       (colorshift-radio-button "rgb(196, 196, 196)" (= :transparency selected) (set-colorshift-fn :transparency))])]
+   (simple-parameter-slider :colorShift "Verlauf zu" 0 1 0.01 event->number)])
 
 (defn image-radio-button [css-bg-image on-click]
   [:button {:class (circular-btn)
@@ -186,31 +219,60 @@
   (image-radio-button (str "url(./assets/icons/Animationsparameter/" file-prefix "-" (if (= id selected) "selected" "clear")  ".png)")
                       (set-animation-parameter-fn id)))
 (defn animation []
-  (abstract-parameters
-   (utils/goto-fn :paincolor)
-   (utils/goto-fn :export)
-   [:div.box
-    (title "./assets/icons/headers/Animation.png" "Animation")
-    [:div.divider]
-    [:li {:key :animation-behavior}
-     [:label {:for :animation-behavior} "Verhalten"]
-     (let [selected @(re-frame/subscribe [::subs/parameter :animation-behavior])]
-       [:div.row
+  [:div.box
+   (title "./assets/icons/headers/Animation.png" "Animation" ["Ist Ihr Schmerz pulsierend, drückend oder Stechend oder still? Hat dieser eine Richtung?"
+                                                              "Stellen Sie dieses als nächstes Ein!"
+                                                              "Wählen Sie erst, ob diese Aufbauend, Abbauend oder gleichmäßig pulsieren soll und anschließend, welchen 
+                                                               Parameter (Größe, Form, Materialität, Schärfe) Sie animieren wollen."
+                                                              "Über die Schieberegler können Sie die Frequenz und das Volumen der Animation einstellen."])
+   [:div.divider]
+   [:li {:key :animation-behavior}
+    [:label {:for :animation-behavior} "Verhalten"]
+    (let [selected @(re-frame/subscribe [::subs/parameter :animation-behavior])]
+      [:div
+       [:div.row {:style {:justify-content :flex-start}}
         (simple-animation-behavior-picker "aus" :off selected)
         (simple-animation-behavior-picker "Aufbauend" :linear-in selected)
         (simple-animation-behavior-picker "Abbauend" :linear-out selected)
-        (simple-animation-behavior-picker "Gleichmaessig" :soft selected)])]
-    [:div.divider]
-    [:li {:key :animation-parameter}
-     [:label {:for :animation-parameter} "Parameter"]
-     (let [selected @(re-frame/subscribe [::subs/parameter :animation-parameter])]
-       [:div.row
+        (simple-animation-behavior-picker "Gleichmaessig" :soft selected)]
+       [:div.divider {:style {:margin-bottom 0}}]])]
+   [:li {:key :animation-parameter}
+    [:label {:for :animation-parameter} "Parameter"]
+    (let [selected @(re-frame/subscribe [::subs/parameter :animation-parameter])]
+      [:div
+       [:div.row {:style {:justify-content :flex-start}}
         (simple-animation-parameter-picker "size" :radius selected)
         (simple-animation-parameter-picker "spikes" :wing-length selected)
         (simple-animation-parameter-picker "amount" :dissolve selected)
-        (simple-animation-parameter-picker "gradient" :sharpness selected)])]
-    [:div.divider]
-    (simple-parameter-slider :animation-frequency-hz "Frequenz" 0.4 5 0.01 event->number)
-    (simple-parameter-slider :animation-amplitude "Volumen" 0.1 1 0.01 event->number)]))
+        (simple-animation-parameter-picker "gradient" :sharpness selected)]
+       [:div.divider {:style {:margin-bottom 0}}]])]
+   (simple-parameter-slider :animation-frequency-hz "Frequenz" 0.4 5 0.01 event->number)
+   (simple-parameter-slider :animation-amplitude "Volumen" 0.1 1 0.01 event->number)
+   [:div.divier]
+   [:li {:key :animation-direction}
+    [:label {:for :animation-direction} "Richtung"]
+    [:div.center (reagent/create-element Joystick (clj->js {:size 200
+                                                            :stickSize 70
+                                                            :sticky true
+                                                            :baseColor styles/very-light-grey
+                                                            :stickColor styles/dark-grey
+                                                            :stop #(let [obj (js->clj %)]
+                                                                     (re-frame/dispatch [::events/set-param :animation-origin
+                                                                                         [(get obj "x") (get obj "y")]]))}))]]])
 
-(comment)
+(defn save-gif []
+  (.then (js/Promise.resolve ^js (.saveAsGif @db/pain-vis))
+         #((let [a (.getElementById js/document "recording")]
+             (.setAttribute a "href" %)
+             (.click a)))))
+
+(defn export []
+  [:div.box
+   [:div.center [:p
+                 {:style {:font-weight :bold :text-align :center}}
+                 "Die Schmerzerfassung ist abgeschlossen. Sie können die animierte Darstellung jetzt herutnerladen"]]
+   [:div.center [outlined-button ["Download" [:div {:class (download-button-icon-container)}
+                                              [:div {:class (download-button-icon)}]]] save-gif styles/green {}]]])
+
+(comment
+  (.click (.getElementById js/document "recording")))

@@ -2,6 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]))
 
+(s/def ::overlay (s/or :nil nil? :string (s/coll-of string?)))
+
 (def non-negative-num? (s/and number? #(>= % 0)))
 (s/def ::id (s/and int? #(>= % 0)))
 (s/def ::position (s/tuple non-negative-num? non-negative-num?))
@@ -26,6 +28,8 @@
 (s/def ::animation-parameter #{:radius :wing-length :dissolve :sharpness})
 (s/def ::animation-frequency-hz (s/and number? #(<= 0.4 % 5)))
 (s/def ::animation-amplitude (s/and number? #(<= 0.1 % 1)))
+(def unit? (s/and number? #(<= -1 % 1)))
+(s/def ::animation-origin (s/tuple unit? unit?))
 
 (s/def ::parameters (s/keys :req-un [::areas
 
@@ -44,13 +48,15 @@
                                      ::animation-behavior
                                      ::animation-parameter
                                      ::animation-frequency-hz
-                                     ::animation-amplitude]))
+                                     ::animation-amplitude
+                                     ::animation-origin]))
 
 (s/def ::area-asset string?)
 (s/def ::name string?)
 (s/def ::page-id keyword?)
 
 (s/def ::db (s/keys :req-un [::name
+                             ::overlay
                              ::area-asset
                              ::page-id
                              ::parameters]))
