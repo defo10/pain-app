@@ -3,6 +3,7 @@
             [clojure.spec.gen.alpha :as gen]))
 
 (s/def ::overlay (s/or :nil nil? :string (s/coll-of string?)))
+(s/def ::exporting boolean?)
 
 (def non-negative-num? (s/and number? #(>= % 0)))
 (s/def ::id (s/and int? #(>= % 0)))
@@ -56,6 +57,7 @@
 (s/def ::page-id keyword?)
 
 (s/def ::db (s/keys :req-un [::name
+                             ::exporting
                              ::overlay
                              ::area-asset
                              ::page-id

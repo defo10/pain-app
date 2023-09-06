@@ -60,7 +60,7 @@
    [:div {:class (styles/text-container)}
     [:p "Diese Anwendung ist in dem Forschungsprojekt „Schmerzen Formen“ entwickelt worden, welches in Kooperation zwischen der Fakultät Kunst und Gestaltung der Bauhaus-Universität Weimar und der Klinik für Anästhesiologie und  Intensivmedizin der Universität Jena durchgeführt wurde."]
     [:p "Wir freuen uns über Kritik und Anregungen, schicken Sie uns dazu gerne eine " [:a {:href "mailto:mail@johannesbreuer.de"} "Mail."]]
-    [:div.row {:style {:padding-top "20vh" :padding-bottom "5vh"}}
+    [:div.row {:style {:padding-top "5vh" :padding-bottom "5vh"}}
      [:img {:src "./assets/Logo_Jena.jpg" :style {:height 100}}]
      [:img {:src "./assets/Logo_Weimar.jpg" :style {:height 100}}]]
     [:p {:class (subtitle)} "PhD-Arbeit von Johannes Breuer, M.A., betreut durch: Prof. Dr. Jan Sebastian Willmann und Prof. Dipl. Des. Andreas Mühlenberend 
@@ -76,8 +76,11 @@
 
 (defn str->p [i str] [:p {:key i :style {:font-size "1.2rem"}} str])
 
+(defclass overlay-and-backdrop []
+  {:width "100vw" :height "100vh" :position :absolute :z-index :3 :backdrop-filter "blur(25px)"})
+
 (defn overlay-container [overlay]
-  [:div {:style {:width "100vw" :height "100vh" :position :absolute :z-index :3 :backdrop-filter "blur(20px)"}}
+  [:div.overlay-container {:class (overlay-and-backdrop)}
    [:div.row {:style {:flex-direction :row-reverse :margin-top "3%" :margin-right "5%"}}
     [:button {:class (styles/text-button) :on-click #(re-frame/dispatch [::events/set-overlay nil])} "×"]]
    [:div.center {:style {:padding "10% 10%"}} (map-indexed str->p overlay)]])

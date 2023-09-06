@@ -5,6 +5,7 @@
    :page-id :start
    :area-asset ""
    :overlay nil
+   :exporting false
    :parameters {:areas []
                 :wing-length 0
                 :spikiness 0.2

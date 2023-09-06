@@ -13,9 +13,9 @@
    {:reagent-render (fn []
                       [:div#canvasContainer
                        {:style
-                        {:background-color "red"
-                         :width "100%"
-                         :height "50vh"}}])
+                        {:width "100%"
+                         :height "50vh"
+                         :opacity "0"}}])
     :component-did-mount (fn [component]
                            (let [{:keys [asset-location parameters]} (reagent/props component)]
                              (when (compare-and-set! db/pain-vis nil

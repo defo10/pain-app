@@ -60,7 +60,7 @@
     [:div {:class (thumbnail-image icon-location)}]
     [:h2 title]]
    [:button {:class (styles/text-button)
-             :style {:font-size "1rem"}
+             :style {:font-size "1.3rem"}
              :on-click #(re-frame/dispatch [::events/set-overlay overlay-texts])} "ⓘ"]])
 
 (defn painareas []
@@ -224,6 +224,7 @@
                        (if (= id-value 0) "inactive" "clear"))
         on-click-fn (if (= file-state "inactive") #() (set-animation-parameter-fn id))]
     (image-radio-button (str "url(./assets/icons/Animationsparameter/" file-prefix "-" file-state ".png)") on-click-fn)))
+
 (defn animation []
   [:div.box
    (title "./assets/icons/headers/Animation.png" "Animation" ["Ist Ihr Schmerz pulsierend, drückend oder stechend oder still? Hat dieser eine Richtung?"
@@ -267,18 +268,24 @@
                                                                                          [(get obj "x") (get obj "y")]]))}))]]])
 
 (defn save-gif []
+  (re-frame/dispatch [::events/set-exporting true])
+  (js/alert "Der Download beginnt in wenigen Sekunden. Das Exportieren kann bis zu 30 Sekunden dauern. Bitte verlassen Sie die Seite nicht.")
   (.then (js/Promise.resolve ^js (.saveAsGif @db/pain-vis))
          #((let [a (.getElementById js/document "recording")]
              (.setAttribute a "href" %)
-             (.click a)))))
+             (.click a)
+             (re-frame/dispatch [::events/set-exporting false])))))
 
 (defn export []
   [:div.box
    [:div.center [:p
                  {:style {:font-weight :bold :text-align :center}}
-                 "Die Schmerzerfassung ist abgeschlossen. Sie können die animierte Darstellung jetzt herutnerladen"]]
-   [:div.center [outlined-button ["Download" [:div {:class (download-button-icon-container)}
-                                              [:div {:class (download-button-icon)}]]] save-gif styles/green {}]]])
+                 "Die Schmerzerfassung ist abgeschlossen. Sie können die animierte Darstellung jetzt herunterladen."]]
+   [:div.center (let [exporting @(re-frame/subscribe [::subs/exporting])]
+                  (if exporting
+                    [:div.lds-ellipsis [:div] [:div] [:div] [:div]]
+                    [outlined-button ["Download" [:div {:class (download-button-icon-container)}
+                                                  [:div {:class (download-button-icon)}]]] save-gif styles/green {}]))]])
 
 (comment
   (.click (.getElementById js/document "recording")))

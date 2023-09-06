@@ -69,7 +69,7 @@
    {:width "100vw"
     :margin-top "80px"
     :display :flex
-    :height "100%"
+    :min-height "100%"
     :flex-direction :column
     :background-color :white}]
   (at-media {:min-width "750px"} [:.main {:width "750px"}]))

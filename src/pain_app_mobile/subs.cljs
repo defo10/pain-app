@@ -36,3 +36,8 @@
  ::overlay
  (fn [db]
    (:overlay db)))
+
+(re-frame/reg-sub
+ ::exporting
+ (fn [db]
+   (:exporting db)))

@@ -15,16 +15,19 @@
 (re-frame/reg-event-db
  :set-page-id
  (fn [db [_ new-page-id]]
+   {:post [(s/valid? ::specs/db db)]}
    (assoc db :page-id new-page-id)))
 
 (re-frame/reg-event-db
  :set-area-asset
  (fn [db [_ new-area-asset]]
+   {:post [(s/valid? ::specs/db db)]}
    (assoc db :area-asset new-area-asset)))
 
 (re-frame/reg-event-db
  ::set-overlay
  (fn [db [_ overlay]]
+   {:post [(s/valid? ::specs/db db)]}
    (assoc db :overlay overlay)))
 
 (defn update-areas [db [_ new-area]]
@@ -42,6 +45,7 @@
 (re-frame/reg-event-db
  :remove-area-with-id
  (fn [db [_ id]]
+   {:post [(s/valid? ::specs/db db)]}
    (assoc-in db [:parameters :areas]
              (into [] (remove #(= id (:id %)) (get-in db [:parameters :areas]))))))
 
@@ -51,6 +55,12 @@
    {:post [(s/valid? ::specs/db db)]}
    (assoc-in db [:parameters parameter]
              value)))
+
+(re-frame/reg-event-db
+ ::set-exporting
+ (fn [db [_ val]]
+   {:post [(s/valid? ::specs/db db)]}
+   (assoc db :exporting val)))
 
 (comment
   (def test-db (gen/generate (s/gen ::specs/db)))
