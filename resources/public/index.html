@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>pain-app-mobile</title>
+  <title>Visual Pain App</title>
+  <link rel="icon" type="image/x-icon" href="./assets/icons/Animationsparameter/amount-selected.png">
   <style>
     /* custom sliders: */
     :root {
@@ -156,6 +157,15 @@
         background-color: rgba(244, 244, 244, 0.8);
       }
     }
+
+    body::after {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      z-index: -1;
+      content: url(./assets/icons/Abbauend_clear.png) url(./assets/icons/Abbauend_selected.png) url(./assets/icons/Aufbauend_clear.png) url(./assets/icons/Aaufbauend_selected.png) url(./assets/icons/Bereich-Trashcan.png) url(./assets/icons/Gleichmaessig_clear.png) url(./assets/icons/Gleichmaessig_selected.png);
+    }
   </style>
 </head>
 
@@ -163,7 +173,7 @@
   <noscript>
     pain-app-mobile is a JavaScript app. Please enable JavaScript to continue.
   </noscript>
-  <a id="recording" download="schmerzerfassung.gif" style="position: absolute;"></a>
+  <a id="recording" style="position: absolute;"></a>
   <div id="app"></div>
   <script src="/js/libraries/painshapevisualization.js"></script>
   <script src="/js/compiled/app.js"></script>
