@@ -21,6 +21,7 @@
 
 (defn- areapicker-ui [title items prev-page-id]
   [:div.main
+   [components/centered-header "1/6"]
    [:div {:class (styles/text-container)}
     [:p title]
     (for [{:keys [label on-click]} items]
@@ -55,7 +56,7 @@
    :areapicker-part-body])
 
 (defn arms []
-  [areapicker-ui "Wo an Armen und Händen?" [{:label "Rechter Arm" :on-click (start-with-asset "parsArmsRight")}
+  [areapicker-ui "Wo an Armen und Händen?" [{:label "Rechter Arm" :on-click (start-with-asset "partsArmsRight")}
                                             {:label "Rechte Hand" :on-click (start-with-asset "partsArmsHandRight")}
                                             {:label "Linker Arm" :on-click (start-with-asset "partsArmsLeft")}
                                             {:label "Linke Hand" :on-click (start-with-asset "partsArmsHandLeft")}]

@@ -27,3 +27,6 @@
    (slider min max step value on-change false))
   ([min max step value on-change disabled]
    [:input {:type :range :min min, :max max, :step step, :value value :on-change on-change :disabled disabled}]))
+
+(defn centered-header [text]
+  [:div.row {:style {:justify-content :center :font-weight :bold :padding "2rem 0 0 0"}} text])
