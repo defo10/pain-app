@@ -14,15 +14,14 @@
                       [:div#canvasContainer
                        {:style
                         {:width "100%"
-                         :height "50vh"
+                         :height "60vh"
                          :opacity "0"}}])
     :component-did-mount (fn [component]
                            (let [{:keys [asset-location parameters]} (reagent/props component)]
                              (when (compare-and-set! db/pain-vis nil
                                                      (new pain-vis (.getElementById js/document "canvasContainer")))
-                               (.then (js/Promise.resolve ^js (.init @db/pain-vis))
-                                      #(.start @db/pain-vis asset-location))
-                               ^js (.updateModel @db/pain-vis (clj->js parameters)))))
+                               (.then (js/Promise.resolve ^js (.start @db/pain-vis asset-location))
+                                      (fn [] ^js (.updateModel @db/pain-vis (clj->js parameters)))))))
     :component-did-update (fn [component]
                             (let [{:keys [parameters]} (reagent/props component)]
                               ^js (.updateModel @db/pain-vis (clj->js parameters))))

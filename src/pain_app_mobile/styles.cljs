@@ -33,7 +33,7 @@
    {:display :flex
     :justify-content :space-between
     :align-items :center
-    :padding-bottom "0.5rem"}]
+    :padding-bottom "0.1rem"}]
   [:.center
    {:display :grid
     :justify-content :center
@@ -49,10 +49,9 @@
     :margin-inline-end 0
     :padding-inline-start 0}]
   [:li
-   {:list-style-type :none
-    :padding-bottom "1.3rem"}]
+   {:list-style-type :none}]
   [:.divider
-   {:margin "12px 0"
+   {:margin "6px 0"
     :width "100%"
     :border-top "1px solid #bbb"}]
   [:.box
@@ -61,24 +60,27 @@
     :display :flex
     :flex-direction :column
     :gap "0.5rem"
-    :padding "32px"
-    :background-color :white}]
+    :padding "16px"
+    :background-color :white
+    :flex-grow "1"}]
   [:a
    {:color :black}]
   [:.main
    {:width "100vw"
-    :margin-top "80px"
+    :min-height "100vh"
     :display :flex
-    :min-height "100%"
+    :height "max(100%, 100vh)"
     :flex-direction :column
     :background-color :white}]
-  (at-media {:min-width "750px"} [:.main {:width "750px"}]))
+  (at-media {:min-width "750px"}
+            [:.main {:width "750px"}]
+            [:.box {:padding "32px"}]))
 
 ; note: range inputs are directly styled within the index.html because I could not figure out how to 
 ; apply input[type="range"]::... selectors in garden/spade
 
 (defclass text-container []
-  {:display "flex" :flex-direction "column" :padding "2em"})
+  {:display "flex" :flex-direction "column" :padding "1rem 2rem"})
 
 (defclass text-button []
   {:background-color :unset

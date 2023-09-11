@@ -23,8 +23,8 @@
 (defclass thumbnail-image [bg-image-location]
   {:background-image (str "url(" bg-image-location ")")
    :margin-right "8px"
-   :height "20px"
-   :width "20px"
+   :height "28px"
+   :width "28px"
    :border-radius "50%"
    :background-size :contain})
 
@@ -72,13 +72,12 @@
              "Fügen Sie Punkte über das '+' hinzu, verschieben Sie diese an die richtige Stelle und ändern die die Größe über den Schieberegler."
              "Über das Mülltonnensymbol können Sie einen Punkt wieder entfernen."])
      [:div.divider]
-     [:ul
-      (for [a areas] [:li {:key (:id a)}
-                      [:label {:for (:id a)} "Punkt " (:id a)]
-                      [:div.row
-                       [components/slider 10 100 1 (:radius a) #(add-area a %)]
-                       [:div {:class (trash-button-container)}
-                        [:div {:class (trash-button) :on-click #(re-frame/dispatch [:remove-area-with-id (:id a)])}]]]])]
+     (for [a areas] [:li {:key (:id a)}
+                     [:label {:for (:id a)} "Punkt " (:id a)]
+                     [:div.row
+                      [components/slider 10 100 1 (:radius a) #(add-area a %)]
+                      [:div {:class (trash-button-container)}
+                       [:div {:class (trash-button) :on-click #(re-frame/dispatch [:remove-area-with-id (:id a)])}]]]])
      (when (< (count areas) 7)
        [:div.center
         [:button {:class (styles/text-button)
@@ -117,12 +116,22 @@
 
 (defn navigation-row []
   (let [page-id @(re-frame/subscribe [::subs/page-id])]
-    [:div.row {:style {:padding "16px" :height "40px"}}
+    [:div.row {:style {:padding "16px 16px 0 16px"}}
      [outlined-button ["Zurück"] (if (= page-id :pain-points)
                                    #(js/location.reload)
                                    #(re-frame/dispatch [:set-page-id (page-id parameters-back-routing)]))]
+     [:div {:style {:padding "1em" :font-weight "bold"}} (case page-id
+                                                           :start "WILLKOMMEN"
+                                                           :impressum "Impressum"
+                                                           :pain-points "2/6"
+                                                           :painform "3/6"
+                                                           :materialness "4/6"
+                                                           :paincolor "5/6"
+                                                           :painanimation "6/6"
+                                                           :export "ABSCHLUSS"
+                                                           "1/6")]
      (if (= page-id :export)
-       [:div]
+       [:div {:style {:opacity 0}} "Weiter"]
        [outlined-button ["Weiter"] #(re-frame/dispatch [:set-page-id (page-id parameters-next-routing)]) "black" {}])]))
 
 (defn painform []
@@ -242,7 +251,7 @@
         (simple-animation-behavior-picker "Aufbauend" :linear-in selected)
         (simple-animation-behavior-picker "Abbauend" :linear-out selected)
         (simple-animation-behavior-picker "Gleichmaessig" :soft selected)]
-       [:div.divider {:style {:margin-bottom 0}}]])]
+       [:div.divider {:style {:margin-top "16px"}}]])]
    [:li {:key :animation-parameter}
     [:label {:for :animation-parameter} "Parameter"]
     (let [selected @(re-frame/subscribe [::subs/parameter :animation-parameter])]
@@ -252,7 +261,7 @@
         (simple-animation-parameter-picker "spikes" :wing-length selected)
         (simple-animation-parameter-picker "amount" :dissolve selected)
         (simple-animation-parameter-picker "gradient" :sharpness selected)]
-       [:div.divider {:style {:margin-bottom 0}}]])]
+       [:div.divider {:style {:margin-top "16px"}}]])]
    (simple-parameter-slider :animation-frequency-hz "Frequenz" 0.4 5 0.01 event->number false)
    (simple-parameter-slider :animation-amplitude "Volumen" 0.1 1 0.01 event->number false)
    [:div.divier]
@@ -267,25 +276,35 @@
                                                                      (re-frame/dispatch [::events/set-param :animation-origin
                                                                                          [(get obj "x") (get obj "y")]]))}))]]])
 
-(defn save-gif []
+(defn save-media []
   (re-frame/dispatch [::events/set-exporting true])
-  (js/alert "Der Download beginnt in wenigen Sekunden. Das Exportieren kann bis zu 30 Sekunden dauern. Bitte verlassen Sie die Seite nicht.")
-  (.then (js/Promise.resolve ^js (.saveAsGif @db/pain-vis))
-         #((let [a (.getElementById js/document "recording")]
-             (.setAttribute a "href" %)
-             (.click a)
-             (re-frame/dispatch [::events/set-exporting false])))))
+  (let [<750px? (< (-> js/window
+                       .-screen
+                       .-width) 750)
+        onMobileSafari (and <750px? (not (.isTypeSupported js/MediaRecorder "video/webm")))]
+    (.then (js/Promise.resolve ^js (if onMobileSafari
+                                     ^js (.saveAsVideo @db/pain-vis 10)
+                                     ^js (.saveAsGif @db/pain-vis)))
+           #((let [a (.getElementById js/document "recording")]
+               (.setAttribute a "href" %)
+               (.setAttribute a "download" (str "schmerzerfassung." (if onMobileSafari "mp4" "gif")))
+               (.click a)
+               (re-frame/dispatch [::events/set-exporting false]))))))
 
 (defn export []
-  [:div.box
-   [:div.center [:p
-                 {:style {:font-weight :bold :text-align :center}}
-                 "Die Schmerzerfassung ist abgeschlossen. Sie können die animierte Darstellung jetzt herunterladen."]]
-   [:div.center (let [exporting @(re-frame/subscribe [::subs/exporting])]
-                  (if exporting
-                    [:div.lds-ellipsis [:div] [:div] [:div] [:div]]
-                    [outlined-button ["Download" [:div {:class (download-button-icon-container)}
-                                                  [:div {:class (download-button-icon)}]]] save-gif styles/green {}]))]])
+  (let [exporting @(re-frame/subscribe [::subs/exporting])]
+    [:div.box
+     [:div.center
+      [:p
+       {:style {:font-weight :bold :text-align :center}}
+       (if exporting
+         "Der Download beginnt in wenigen Sekunden. Das Exportieren kann bis zu 30 Sekunden dauern. Bitte verlassen Sie die Seite nicht."
+         "Die Schmerzerfassung ist abgeschlossen. Sie können die animierte Darstellung jetzt herunterladen.")]]
+     [:div.center
+      (if exporting
+        [:div.lds-ellipsis [:div] [:div] [:div] [:div]]
+        [outlined-button ["Download" [:div {:class (download-button-icon-container)}
+                                      [:div {:class (download-button-icon)}]]] save-media styles/green {}])]]))
 
 (comment
   (.click (.getElementById js/document "recording")))
