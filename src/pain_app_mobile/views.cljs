@@ -55,10 +55,11 @@
   {:width "100%" :height "100%"
    :position :fixed :top 0
    :z-index :3
+   :-webkit-backdrop-filter "blur(25px)"
    :backdrop-filter "blur(25px)"})
 
 (defn overlay-container [overlay]
-  [:div.overlay-container {:class (overlay-and-backdrop)}
+  [:div {:class (overlay-and-backdrop)}
    [:div.row {:style {:flex-direction :row-reverse :margin-top "3%" :margin-right "5%"}}
     [:button {:class (styles/text-button) :on-click #(re-frame/dispatch [::events/set-overlay nil])} "×"]]
    [:div.center {:style {:padding "10% 10%"}} (map-indexed str->p overlay)]])
