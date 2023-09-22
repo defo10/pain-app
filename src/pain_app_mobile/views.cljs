@@ -68,7 +68,7 @@
    (let [overlay @(re-frame/subscribe [::subs/overlay])]
      (when overlay
        [overlay-container overlay]))
-   (let [page-id @(re-frame/subscribe [::subs/page-id]) overlay @(re-frame/subscribe [::subs/overlay])]
+   (let [page-id @(re-frame/subscribe [::subs/page-id])]
      (case page-id
        :start [intro]
        :impressum [impressum]
