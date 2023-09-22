@@ -73,7 +73,7 @@
              "Über das Mülltonnensymbol können Sie einen Punkt wieder entfernen."])
      [:div.divider]
      (for [a areas] [:li {:key (:id a)}
-                     [:label {:for (:id a)} "Punkt " (:id a)]
+                     [:label "Punkt " (:id a)]
                      [:div.row
                       [components/slider 10 100 1 (:radius a) #(add-area a %)]
                       [:div {:class (trash-button-container)}
@@ -89,7 +89,7 @@
 
 (defn decorated-slider [id label min max step value on-change disabled]
   [:li {:key id}
-   [:label {:for id :style {:color (if disabled "var(--disabled-grey)" "unset")}} label]
+   [:label {:style {:color (if disabled "var(--disabled-grey)" "unset")}} label]
    [:div.row
     [components/slider min max step value on-change disabled]]])
 
@@ -116,7 +116,7 @@
 
 (defn navigation-row []
   (let [page-id @(re-frame/subscribe [::subs/page-id])]
-    [:div.row {:style {:padding "16px 16px 0 16px"}}
+    [:div.row {:style {:padding "8px 16px 8px 16px" :background "white" :position :sticky :top 0}}
      [outlined-button ["Zurück"] (if (= page-id :pain-points)
                                    #(js/location.reload)
                                    #(re-frame/dispatch [:set-page-id (page-id parameters-back-routing)]))]
@@ -193,7 +193,7 @@
                                                       "Mit dem Schieberegler können Sie die Stärke des Verlaufes bestimmen."])
    [:div.divider]
    [:li {:key :color}
-    [:label {:for :color} "Farbe"]
+    [:label "Farbe"]
     (let [selected @(re-frame/subscribe [::subs/parameter :color])]
       [:div.row {:style {:justify-content :flex-start}}
        (color-radio-button "rgb(250, 27, 27)" (= :red selected) (set-color-fn :red))
@@ -201,7 +201,7 @@
        (color-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-color-fn :yellow))])]
    (simple-parameter-slider :lightness "Helligkeit" 0.3 0.8 0.01 event->number false)
    [:li {:key :outerColor}
-    [:label {:for :outerColor} "Verlauf zu"]
+    [:label "Verlauf zu"]
     (let [selected @(re-frame/subscribe [::subs/parameter :outerColor])]
       [:div.row {:style {:justify-content :flex-start}}
        (colorshift-radio-button "rgb(250, 187, 27)" (= :yellow selected) (set-colorshift-fn :yellow))
@@ -243,7 +243,7 @@
                                                               "Über die Schieberegler können Sie die Frequenz und das Volumen der Animation einstellen."])
    [:div.divider]
    [:li {:key :animation-behavior}
-    [:label {:for :animation-behavior} "Verhalten"]
+    [:label "Verhalten"]
     (let [selected @(re-frame/subscribe [::subs/parameter :animation-behavior])]
       [:div
        [:div.row {:style {:justify-content :flex-start}}
@@ -253,7 +253,7 @@
         (simple-animation-behavior-picker "Gleichmaessig" :soft selected)]
        [:div.divider {:style {:margin-top "16px"}}]])]
    [:li {:key :animation-parameter}
-    [:label {:for :animation-parameter} "Parameter"]
+    [:label "Parameter"]
     (let [selected @(re-frame/subscribe [::subs/parameter :animation-parameter])]
       [:div
        [:div.row {:style {:justify-content :flex-start}}
@@ -266,7 +266,7 @@
    (simple-parameter-slider :animation-amplitude "Volumen" 0.1 1 0.01 event->number false)
    [:div.divier]
    [:li {:key :animation-direction}
-    [:label {:for :animation-direction} "Richtung"]
+    [:label "Richtung"]
     [:div.center (reagent/create-element Joystick (clj->js {:size 200
                                                             :stickSize 70
                                                             :sticky true
