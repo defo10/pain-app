@@ -3,7 +3,8 @@
             [clojure.spec.gen.alpha :as gen]
             [pain-app-mobile.db :as db]
             [pain-app-mobile.specs :as specs]
-            [re-frame.core :as re-frame]))
+            [re-frame.core :as re-frame]
+            [pain-app-mobile.effects]))
 
 (declare _)
 
@@ -18,11 +19,18 @@
    {:post [(s/valid? ::specs/db db)]}
    (assoc db :page-id new-page-id)))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
  :set-area-asset
- (fn [db [_ new-area-asset]]
+ (fn [cofx [_ new-area-asset]]
+   {:post [(s/valid? ::specs/db (:db cofx))]}
+   {:db (assoc (:db cofx) :area-asset new-area-asset)
+    :fx [[:calc-area-asset-aspect-ratio new-area-asset]]}))
+
+(re-frame/reg-event-db
+ :set-area-asset-aspect-ratio
+ (fn [db [_ new-aspect-ratio]]
    {:post [(s/valid? ::specs/db db)]}
-   (assoc db :area-asset new-area-asset)))
+   (assoc db :area-asset-aspect-ratio new-aspect-ratio)))
 
 (re-frame/reg-event-db
  ::set-overlay

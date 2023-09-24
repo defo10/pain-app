@@ -64,6 +64,9 @@
     [:button {:class (styles/text-button) :on-click #(re-frame/dispatch [::events/set-overlay nil])} "×"]]
    [:div.center {:style {:padding "10% 10%"}} (map-indexed str->p overlay)]])
 
+(defclass canvasOuterContainer [asset-aspect-ratio]
+  {:width "100%" :aspect-ratio asset-aspect-ratio :max-height "60vh"})
+
 (defn main-panel []
   [:div {:style {:display :flex :flex-direction :column :align-items :center}}
    (let [overlay @(re-frame/subscribe [::subs/overlay])]
@@ -81,13 +84,15 @@
        :areapicker-torso [areapickers/torso]
        :areapicker-subbody [areapickers/subbody]
        :areapicker-legs [areapickers/legs]
-       ;; we render the animation canvas here to prevent it from re-mounting the component on page change, thus
-       ;; component-did-mount is only called once and the canvas isn't re-rendered repeatedly
        [:div.main
         [parameters/navigation-row]
         (let [asset-location @(re-frame/subscribe [::subs/area-asset])
+              asset-aspect-ratio @(re-frame/subscribe [::subs/area-asset-aspect-ratio])
               parameters @(re-frame/subscribe [::subs/parameters])]
-          [pain-vis-container {:asset-location asset-location :parameters parameters}])
+          ;; we render the animation canvas here to prevent it from re-mounting the component on page change
+          (when asset-aspect-ratio
+            [:div {:class (canvasOuterContainer asset-aspect-ratio)}
+             [pain-vis-container {:asset-location asset-location :parameters parameters}]]))
         (case page-id
           :pain-points [parameters/painareas]
           :painform [parameters/painform]

@@ -28,6 +28,11 @@
    (:area-asset db)))
 
 (re-frame/reg-sub
+ ::area-asset-aspect-ratio
+ (fn [db]
+   (:area-asset-aspect-ratio db)))
+
+(re-frame/reg-sub
  ::parameters
  (fn [db]
    (:parameters db)))

@@ -53,6 +53,7 @@
                                      ::animation-origin]))
 
 (s/def ::area-asset string?)
+(s/def ::area-asset-aspect-ratio (s/or :nil nil? :num number?))
 (s/def ::name string?)
 (s/def ::page-id keyword?)
 
@@ -60,6 +61,7 @@
                              ::exporting
                              ::overlay
                              ::area-asset
+                             ::area-asset-aspect-ratio
                              ::page-id
                              ::parameters]))
 

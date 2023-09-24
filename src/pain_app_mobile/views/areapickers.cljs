@@ -34,10 +34,10 @@
     (re-frame/dispatch [:set-page-id :pain-points])))
 
 (defn whole-body []
-  [areapicker-ui "Welche Ansicht vom ganzen Körper?" [{:label "Frontal", :on-click (start-with-asset "wholeFront")}
-                                                      {:label "Von Hinten", :on-click (start-with-asset "wholeBack")}
-                                                      {:label "Rechte Seite", :on-click (start-with-asset "wholeRight")}
-                                                      {:label "Linke Seite", :on-click (start-with-asset "wholeLeft")}]
+  [areapicker-ui "Welche Ansicht vom ganzen Körper?" [{:label "Frontal", :on-click (start-with-asset "./assets/whole/front.png")}
+                                                      {:label "Von Hinten", :on-click (start-with-asset "./assets/whole/back.png")}
+                                                      {:label "Rechte Seite", :on-click (start-with-asset "./assets/whole/left.png")}
+                                                      {:label "Linke Seite", :on-click (start-with-asset "./assets/whole/right.png")}]
    :areapicker-general])
 
 (defn part-of-body []
@@ -49,36 +49,36 @@
    :areapicker-general])
 
 (defn neck []
-  [areapicker-ui "Wo am Kopf und Nacken?" [{:label "Frontal" :on-click (start-with-asset "partsHeadFront")}
-                                           {:label "Hinterkopf und Nacken" :on-click (start-with-asset "partsHeadBack")}
-                                           {:label "Rechte Seite" :on-click (start-with-asset "partsHeadRight")}
-                                           {:label "Linke Seite" :on-click (start-with-asset "partsHeadLeft")}]
+  [areapicker-ui "Wo am Kopf und Nacken?" [{:label "Frontal" :on-click (start-with-asset "./assets/parts/head/head-front.png")}
+                                           {:label "Hinterkopf und Nacken" :on-click (start-with-asset "./assets/parts/head/head-back.png")}
+                                           {:label "Rechte Seite" :on-click (start-with-asset "./assets/parts/head/head-right.png")}
+                                           {:label "Linke Seite" :on-click (start-with-asset "./assets/parts/head/head-left.png")}]
    :areapicker-part-body])
 
 (defn arms []
-  [areapicker-ui "Wo an Armen und Händen?" [{:label "Rechter Arm" :on-click (start-with-asset "partsArmsRight")}
-                                            {:label "Rechte Hand" :on-click (start-with-asset "partsArmsHandRight")}
-                                            {:label "Linker Arm" :on-click (start-with-asset "partsArmsLeft")}
-                                            {:label "Linke Hand" :on-click (start-with-asset "partsArmsHandLeft")}]
+  [areapicker-ui "Wo an Armen und Händen?" [{:label "Rechter Arm" :on-click (start-with-asset "./assets/parts/arms/arm-right.png")}
+                                            {:label "Rechte Hand" :on-click (start-with-asset "./assets/parts/arms/hand-right.png")}
+                                            {:label "Linker Arm" :on-click (start-with-asset "./assets/parts/arms/arm-left.png")}
+                                            {:label "Linke Hand" :on-click (start-with-asset "./assets/parts/arms/hand-left.png")}]
    :areapicker-part-body])
 
 (defn torso []
-  [areapicker-ui "Wo am Torso?" [{:label "Frontal" :on-click (start-with-asset "partsUpperFront")}
-                                 {:label "Rücken" :on-click (start-with-asset "partsUpperBack")}
-                                 {:label "Rechte Seite" :on-click (start-with-asset "partsUpperRight")}
-                                 {:label "Linke Seite" :on-click (start-with-asset "partsUpperLeft")}]
+  [areapicker-ui "Wo am Torso?" [{:label "Frontal" :on-click (start-with-asset "./assets/parts/upper/front.png")}
+                                 {:label "Rücken" :on-click (start-with-asset "./assets/parts/upper/back.png")}
+                                 {:label "Rechte Seite" :on-click (start-with-asset "./assets/parts/upper/right.png")}
+                                 {:label "Linke Seite" :on-click (start-with-asset "./assets/parts/upper/left.png")}]
    :areapicker-part-body])
 
 (defn subbody []
-  [areapicker-ui "Wo am Unterkörper?" [{:label "Frontal" :on-click (start-with-asset "partsLowerFront")}
-                                       {:label "Gesäß" :on-click (start-with-asset "partsLowerBack")}]
+  [areapicker-ui "Wo am Unterkörper?" [{:label "Frontal" :on-click (start-with-asset "./assets/parts/lower/front.png")}
+                                       {:label "Gesäß" :on-click (start-with-asset "./assets/parts/lower/back.png")}]
    :areapicker-part-body])
 
 (defn legs []
-  [areapicker-ui "Wo an Beinen und Füßen?" [{:label "Beine Vorne" :on-click (start-with-asset "partsLegsFront")}
-                                            {:label "Beine Hinten" :on-click (start-with-asset "partsLegsBack")}
-                                            {:label "Rechter Fuß" :on-click (start-with-asset "partsLegsFootRight")}
-                                            {:label "Linker Fuß" :on-click (start-with-asset "partsLegsFootLeft")}]
+  [areapicker-ui "Wo an Beinen und Füßen?" [{:label "Beine Vorne" :on-click (start-with-asset "./assets/parts/legs/legs-front.png")}
+                                            {:label "Beine Hinten" :on-click (start-with-asset "./assets/parts/legs/legs-back.png")}
+                                            {:label "Rechter Fuß" :on-click (start-with-asset "./assets/parts/legs/foot-right.png")}
+                                            {:label "Linker Fuß" :on-click (start-with-asset "./assets/parts/legs/foot-left.png")}]
    :areapicker-part-body])
 
 (defn overview []

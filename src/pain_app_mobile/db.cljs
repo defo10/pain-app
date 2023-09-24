@@ -4,6 +4,7 @@
   {:name "re-frame"
    :page-id :start
    :area-asset ""
+   :area-asset-aspect-ratio nil
    :overlay nil
    :exporting false
    :parameters {:areas []
