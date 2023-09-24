@@ -15,6 +15,7 @@
                        {:style
                         {:width "100%"
                          :height "100%"
+                         :max-height "60vh" ;; in mobile safari, when using aspect-ratio and max-height, safari would ignore max-height 
                          :opacity "0"}}])
     :component-did-mount (fn [component]
                            (let [{:keys [asset-location parameters]} (reagent/props component)]
