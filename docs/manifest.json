@@ -26,9 +26,9 @@
           "purpose": "maskable"
         }
       ],
-    "id": "./index.html?source=pwa",
-    "start_url": "./index.html?source=pwa",
-    "scope": "/pain-app",
+    "id": "/pain-app/?source=pwa",
+    "start_url": "/pain-app/?source=pwa",
+    "scope": "/pain-app/",
     "background_color": "#ffffff",
     "display": "standalone",
     "theme_color": "#ffffff"
