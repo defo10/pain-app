@@ -11,7 +11,7 @@
   [re-frisk "1.6.0"]
   [org.clojure/test.check "1.1.1"]]
  :dev-http
- {8280 "resources/public"
+ {8280 "docs"
   8290 "target/browser-test"}
 
  :builds
@@ -19,7 +19,7 @@
   {:target     :browser
    :js-options {:resolve {"painshapevisualization" {:target :global
                                                     :global "PainShapeVisualization"}}}
-   :output-dir "resources/public/js/compiled"
+   :output-dir "docs/js/compiled"
    :asset-path "/js/compiled"
    :modules
    {:app {:init-fn pain-app-mobile.core/init}}
