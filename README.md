@@ -1,7 +1,6 @@
 # pain-app-mobile
 
-A [re-frame](https://github.com/day8/re-frame) application designed to ... well, that part is up to
-you.
+A [re-frame](https://github.com/day8/re-frame) application designed to provide an easy to use pwa that interacts with the [pain-app-webview](https://github.com/defo10/pain-app-webview).
 
 ## Getting Started
 
